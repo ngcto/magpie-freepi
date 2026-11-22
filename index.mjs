@@ -1,48 +1,44 @@
-// magpie provider plugin: FreePi — scaffold.
+// magpie provider plugin: FreePi (freepi.ai).
 //
-// The provider is declared here so magpie can load this repository and list it.
-// The sign-in, its requests and its allowance are the work of the pull request
-// that follows; until it lands, signing in says so rather than half-working.
+// magpie loads this file into its Bun host and calls the one function it
+// exports. The hooks it returns are magpie's own contract
+// (usemagpie.ai/docs/plugins): `config` declares the provider, `auth` signs an
+// account in and makes its requests, and `provider.models` lists what that
+// account may use.
 
-const PROVIDER = "freepi"
-const BASE = "https://api.freepi.ai/v1"
+import { PROVIDER_ID, baseUrl } from "./lib/contract.mjs"
+import { providerConfig, modelsHook } from "./lib/provider.mjs"
+import { authHook } from "./lib/auth.mjs"
 
-export default async function FreePiPlugin() {
+// defenseOn is the plugin's one switch, as magpie keeps it: a key the auth
+// hook declares, which the plugin's editor shows and
+// `magpie plugin options freepi '{"defense": true}'` sets.
+function defenseOn(magpie) {
+  if (typeof magpie?.option === "function") return magpie.option(PROVIDER_ID, "defense") === true
+  const opts = typeof magpie?.options === "function" ? magpie.options(PROVIDER_ID) : magpie?.options
+  return opts?.defense === true
+}
+
+export default async function FreePiPlugin(input = {}) {
+  const base = baseUrl()
   return {
     config: async (cfg) => {
       cfg.provider ??= {}
-      cfg.provider[PROVIDER] ??= {
-        name: "FreePi",
-        npm: "@ai-sdk/openai-compatible",
-        api: BASE,
-        models: {
-          "deepseek-v4-flash": { name: "DeepSeek V4 Flash", limit: { context: 200000, output: 32768 }, tool_call: true },
-        },
-      }
+      cfg.provider[PROVIDER_ID] ??= providerConfig()
     },
-    auth: {
-      provider: PROVIDER,
-      methods: [
-        {
-          type: "oauth",
-          label: "Sign in with FreePi",
-          async authorize() {
-            return { type: "failed", error: "FreePi's sign-in isn't in this scaffold yet" }
-          },
-        },
-      ],
-      async loader() {
-        return {}
-      },
-      async usage() {
-        return { windows: [], error: "FreePi isn't signed in" }
-      },
-    },
+    auth: authHook({ client: input.client, base }),
     provider: {
-      id: PROVIDER,
-      async models(provider) {
-        return provider.models
-      },
+      id: PROVIDER_ID,
+      models: modelsHook({ defense: () => defenseOn(input.magpie) }),
     },
   }
+}
+
+// What a test can reach without a plugin host. Nothing here is exported as a
+// bare function, because magpie calls every exported function as a plugin.
+export const _internal = {
+  providerConfig,
+  modelsHook,
+  authHook,
+  defenseOn,
 }
