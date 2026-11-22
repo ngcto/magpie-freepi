@@ -61,7 +61,26 @@ account and you sign in again.
 | past the allowance | FreePi's own `lane`: `fallback` (slow) or `wait` (rejected with a clock) |
 | concurrency | one live request per account, so `magpie.maxConcurrency` is 1. A second one gets FreePi's 429 `concurrent`; a second *session* on one token gets a 409, which the plugin passes on rather than retrying |
 | version gate | FreePi refuses any client under its own minimum (`426 upgrade_required`). The plugin reports the `latest` from FreePi's public catalog, never a made-up version |
-| models listed | 21 of the 28 FreePi's catalog carries. The seven it files under `defense` are behind the switch below, as FreePi's own CLI keeps them behind an opt-in. |
+| models listed | 21 of the 28 FreePi's catalog carries. The seven it files under `defense` are behind a switch, as FreePi's own CLI keeps them behind an opt-in; the `free_only` switch narrows the list further. |
+
+## Free models only
+
+FreePi marks some of its catalog free — the four it shows as "Free Unlimited: limited time" today.
+To keep an agent on only those:
+
+```bash
+magpie plugin options magpie-freepi '{"free_only": true}'   # only the models FreePi marks free
+magpie plugin options magpie-freepi off                      # back to the whole catalog
+```
+
+The plugin asks FreePi's catalog each time it lists, and keeps what the catalog marks `free` at
+that moment: no list of ids lives in this repository, so the switch follows FreePi rather than a
+snapshot of it. Those models are promotional and their number changes — four today, possibly none
+tomorrow. If none are free, the provider lists **no models** rather than quietly showing the paid
+ones, and `magpie provider test freepi` says `no model to try` until you turn the switch off.
+
+`free_only` and `defense` don't add up: no free model is a defense model, so with both on you get
+exactly the free list, and `defense` has nothing to add.
 
 ## FreePi's defense models
 

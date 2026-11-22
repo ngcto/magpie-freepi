@@ -60,21 +60,28 @@ test("refresh says the sign-in ended rather than pretending to renew it", async 
   })
 })
 
-test("the one switch is declared, so magpie can show and set it", () => {
-  const [sw] = plugin.auth.options
-  expect(sw.key).toBe("defense")
-  expect(sw.default).toBe(false)
-  expect(sw.label).toBeTruthy()
-  expect(sw.description).toContain("20-60x")
-  expect(sw.confirm).toContain("daily allowance")
+test("both switches are declared, so magpie can show and set them", () => {
+  const keys = plugin.auth.options.map((o) => o.key)
+  expect(keys).toEqual(["free_only", "defense"])
+  for (const sw of plugin.auth.options) {
+    expect(sw.default).toBe(false)
+    expect(sw.label).toBeTruthy()
+    expect(typeof sw.description).toBe("string")
+  }
+  const [free, defense] = plugin.auth.options
+  expect(free.description).toContain("limited time")
+  expect(free.description).toContain("no models")
+  expect(defense.description).toContain("20-60x")
+  expect(defense.confirm).toContain("daily allowance")
 })
 
-test("magpie's option function turns it on; nothing else does", async () => {
-  const { defenseOn } = _internal
-  expect(defenseOn({ option: (_p, key) => key === "defense" })).toBe(true)
-  expect(defenseOn({ option: () => false })).toBe(false)
-  expect(defenseOn({ options: () => ({ defense: true }) })).toBe(true) // an object-shaped host
-  expect(defenseOn(undefined)).toBe(false)
+test("magpie's option function turns a switch on; nothing else does", async () => {
+  const { switchOn } = _internal
+  expect(switchOn({ option: (_p, key) => key === "defense" }, "defense")).toBe(true)
+  expect(switchOn({ option: (_p, key) => key === "free_only" }, "defense")).toBe(false)
+  expect(switchOn({ option: () => false }, "defense")).toBe(false)
+  expect(switchOn({ options: () => ({ defense: true }) }, "defense")).toBe(true) // an object-shaped host
+  expect(switchOn(undefined, "defense")).toBe(false)
 })
 
 test("_internal carries the pieces a test needs, and no bare function", () => {

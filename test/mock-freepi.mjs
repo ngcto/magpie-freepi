@@ -34,7 +34,7 @@ const ME = {
 
 const TOKEN = "header.payload.signature"
 
-export function startMock({ connect = true, port = 0 } = {}) {
+export function startMock({ connect = true, port = 0, free = true, catalog: override = null } = {}) {
   const seen = []
   let polls = 0
   let devicePolls = 0
@@ -49,7 +49,11 @@ export function startMock({ connect = true, port = 0 } = {}) {
       const json = (data, status = 200) => Response.json(data, { status })
       const bearer = req.headers.get("authorization") || ""
 
-      if (path === "/client-version") return json(CATALOG)
+      if (path === "/client-version") {
+        if (override) return json(override)
+        // `free: false` serves a catalog where the promotion has ended
+        return json({ ...CATALOG, models: CATALOG.models.map((m) => (free ? m : { ...m, free: false })) })
+      }
 
       if (path === "/auth/connect/start") {
         if (!connect) return new Response("404 Not Found", { status: 404 })
@@ -139,7 +143,7 @@ export function startMock({ connect = true, port = 0 } = {}) {
 }
 
 if (import.meta.main) {
-  const mock = startMock({ port: Number(process.env.MOCK_PORT) || 0 })
+  const mock = startMock({ port: Number(process.env.MOCK_PORT) || 0, free: !process.env.MOCK_NO_FREE })
   console.log(`mock FreePi at ${mock.url}`)
   console.log(`try: FREEPI_BASE_URL=${mock.url} …`)
 }
