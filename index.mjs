@@ -10,8 +10,16 @@ import { PROVIDER_ID, baseUrl } from "./lib/contract.mjs"
 import { providerConfig, modelsHook } from "./lib/provider.mjs"
 import { authHook } from "./lib/auth.mjs"
 
+// defenseOn is the plugin's one switch, as magpie keeps it: a key the auth
+// hook declares, which the plugin's editor shows and
+// `magpie plugin options freepi '{"defense": true}'` sets.
+function defenseOn(magpie) {
+  if (typeof magpie?.option === "function") return magpie.option(PROVIDER_ID, "defense") === true
+  const opts = typeof magpie?.options === "function" ? magpie.options(PROVIDER_ID) : magpie?.options
+  return opts?.defense === true
+}
+
 export default async function FreePiPlugin(input = {}) {
-  const options = input.magpie?.options ?? {}
   const base = baseUrl()
   return {
     config: async (cfg) => {
@@ -21,7 +29,7 @@ export default async function FreePiPlugin(input = {}) {
     auth: authHook({ client: input.client, base }),
     provider: {
       id: PROVIDER_ID,
-      models: modelsHook({ defense: options.defense === true }),
+      models: modelsHook({ defense: () => defenseOn(input.magpie) }),
     },
   }
 }
@@ -32,4 +40,5 @@ export const _internal = {
   providerConfig,
   modelsHook,
   authHook,
+  defenseOn,
 }
