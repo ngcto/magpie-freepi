@@ -61,6 +61,25 @@ account and you sign in again.
 | past the allowance | FreePi's own `lane`: `fallback` (slow) or `wait` (rejected with a clock) |
 | concurrency | one live request per account, so `magpie.maxConcurrency` is 1. A second one gets FreePi's 429 `concurrent`; a second *session* on one token gets a 409, which the plugin passes on rather than retrying |
 | version gate | FreePi refuses any client under its own minimum (`426 upgrade_required`). The plugin reports the `latest` from FreePi's public catalog, never a made-up version |
+| models listed | 21 of the 28 FreePi's catalog carries. The seven it files under `defense` are behind the switch below, as FreePi's own CLI keeps them behind an opt-in. |
+
+## FreePi's defense models
+
+FreePi's catalog has a `defense` section: the uncensored models, at 20 to 60
+times the default model's share of the daily allowance per request
+(`abliterated-large-v2` is ×60, `glm-4.7-flash-heretic` ×20). They are not listed
+until you ask for them:
+
+```bash
+magpie plugin options magpie-freepi '{"defense": true}'   # list them too
+magpie plugin options magpie-freepi off                    # back to the rest
+```
+
+The same switch is on the provider's row (Plugins → Installed → FreePi → Plugin
+options). Turning it on adds those models with their multipliers shown as the
+other models' are, so a ×60 one is visible as ×60 wherever models are picked —
+and one request to it spends sixty times as much of the day as
+`deepseek-v4-flash` does.
 
 ## Terms of the service
 

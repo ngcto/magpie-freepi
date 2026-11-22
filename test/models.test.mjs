@@ -45,6 +45,12 @@ test("the defense section is behind this plugin's own opt-in", async () => {
   expect(off["abliterated-large-v2"]).toBeUndefined()
   const on = await modelsHook({ defense: true })(provider, { auth: account })
   expect(on["abliterated-large-v2"].rate).toBe(60)
+  // and a switch read at call time, so turning it on needs no restart
+  let live = false
+  const watched = modelsHook({ defense: () => live })
+  expect((await watched(provider, { auth: account }))["abliterated-large-v2"]).toBeUndefined()
+  live = true
+  expect((await watched(provider, { auth: account }))["abliterated-large-v2"].rate).toBe(60)
 })
 
 test("a model the vendor marks unavailable is not offered", async () => {

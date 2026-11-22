@@ -60,6 +60,23 @@ test("refresh says the sign-in ended rather than pretending to renew it", async 
   })
 })
 
+test("the one switch is declared, so magpie can show and set it", () => {
+  const [sw] = plugin.auth.options
+  expect(sw.key).toBe("defense")
+  expect(sw.default).toBe(false)
+  expect(sw.label).toBeTruthy()
+  expect(sw.description).toContain("20-60x")
+  expect(sw.confirm).toContain("daily allowance")
+})
+
+test("magpie's option function turns it on; nothing else does", async () => {
+  const { defenseOn } = _internal
+  expect(defenseOn({ option: (_p, key) => key === "defense" })).toBe(true)
+  expect(defenseOn({ option: () => false })).toBe(false)
+  expect(defenseOn({ options: () => ({ defense: true }) })).toBe(true) // an object-shaped host
+  expect(defenseOn(undefined)).toBe(false)
+})
+
 test("_internal carries the pieces a test needs, and no bare function", () => {
   for (const value of Object.values(_internal)) expect(typeof value).toBe("function")
   expect(_internal.authHook).toBeTypeOf("function")
