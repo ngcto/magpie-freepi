@@ -43,7 +43,7 @@ test("the sign-in asks for consent before it starts, in plain words", () => {
   expect(terms.message).toContain("train")
   expect(terms.message).toContain("https://freepi.ai/terms")
   expect(terms.options.map((o) => o.value)).toEqual(["browser", "token", "cancel"])
-  expect(token.when).toEqual({ key: "terms", value: "token" })
+  expect(token.when).toEqual({ key: "terms", op: "eq", value: "token" })
 })
 
 test("magpie's own hooks are there: loader, usage, refresh, models", async () => {
