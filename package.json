@@ -1,0 +1,45 @@
+{
+  "name": "magpie-freepi",
+  "version": "0.1.0",
+  "description": "magpie provider plugin: FreePi (freepi.ai) — its free daily allowance and its models, through magpie",
+  "type": "module",
+  "main": "./index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./server": "./index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "magpie",
+    "magpie-plugin",
+    "freepi"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngcto/magpie-freepi.git"
+  },
+  "scripts": {
+    "test": "bun test",
+    "mock": "bun test/mock-freepi.mjs",
+    "verify:live": "node scripts/verify-live.mjs"
+  },
+  "magpie": {
+    "name": "FreePi",
+    "icon": "https://freepi.ai/icon.svg",
+    "summary": {
+      "en": "FreePi's free daily allowance and models, as a magpie provider."
+    },
+    "maxConcurrency": 1
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
